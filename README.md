@@ -1,65 +1,3 @@
-# Augury Prediction Market
-
-Augury is a decentralized prediction market smart contract built on Clarity for the Stacks blockchain. It allows users to stake tokens on binary outcomes, participate in batch predictions, and earn rewards based on the results. The contract includes robust validation, analytics, and admin controls for secure and transparent operation.
-
-## Features
-
- - **Prediction Staking:** Stake tokens on true/false outcomes with secure validation.
- - **Batch Predictions:** Submit multiple predictions in a single transaction.
- - **Analytics:** Tracks daily volume, unique users, prediction counts, and average stake.
- - **Admin Controls:** Owner can set contract parameters, create categories, set staking tiers, pause the contract, and withdraw funds in emergencies.
- - **Rewards:** Distributes staking rewards based on cycles and active stakers.
- - **User Statistics:** Query user performance and contract status.
-
-## Contract Structure
-
- - **State Variables:** Tracks pools, owner, fees, treasury, paused state, deadlines, and batch/category IDs.
- - **Maps:** Stores categories, outcomes, staking tiers, user statistics, analytics, and batch operations.
- - **Validation Functions:** Ensures all inputs and operations are safe and correct.
- - **Prediction Functions:** Handles single and batch predictions, updates pools and analytics.
- - **Claim Function:** Allows users to claim rewards after outcome resolution.
- - **Emergency/Admin Functions:** Owner can manage contract state and perform emergency withdrawals.
- - **Read-Only Functions:** Query pools, user stakes, contract status, and user stats.
-
-## Usage
-
-### Prediction
- - Call `predict` with your choice and stake amount.
- - Call `batch-predict` to submit multiple predictions at once.
-
-### Claiming Rewards
- - After the outcome is resolved, call `claim` to receive your share of the pool.
-
-### Admin Actions
- - Only the contract owner can set parameters, create categories, set staking tiers, pause/unpause, and withdraw funds.
-
-## Development
-
- - Contract code is in `contracts/augury.clar`.
- - Tests are in `tests/augury.test.ts`.
- - Configuration files are in `settings/`.
-
-## Running Tests
-
-Use the following command to run tests:
-
-```bash
-npm test
-```
-
-Or use Clarinet to check contracts:
-
-```bash
-clarinet check
-```
-
-## License
-
-MIT
-
-
-
-```
 # Augury - Decentralized Prediction Market
 
 A robust, secure prediction market smart contract built on the Stacks blockchain using Clarity. Augury allows users to stake STX tokens on binary outcomes and earn rewards based on prediction accuracy.
@@ -74,6 +12,57 @@ A robust, secure prediction market smart contract built on the Stacks blockchain
 - **Security First**: Extensive input validation and overflow protection
 - **Emergency Controls**: Pause mechanism and emergency withdrawal capabilities
 - **Category Management**: Organize predictions into categories with deadlines
+
+## 🔄 Recent Changes
+
+### Security Enhancements
+- Added circuit breaker mechanism to prevent cascading failures
+- Implemented reentrancy protection across all state-changing functions
+- Added comprehensive error tracking and monitoring system
+- Enhanced input validation with safe data extraction functions
+
+### New Features
+- **Failed Operations Recovery**: Added tracking and recovery of failed transactions
+- **Batch Operations**: New secure batch prediction processing with rollback capability
+- **Enhanced Analytics**: Daily market metrics including volume, users, and prediction counts
+- **User Statistics**: Expanded tracking of user performance and staking history
+
+### Technical Improvements
+- Implemented checks-effects-interactions pattern in state-changing functions
+- Added safe data extraction functions for all input processing
+- Enhanced pool validation with overflow protection
+- Added atomic state updates for user statistics
+
+### Administrative Functions
+- Added `reset-circuit-breaker` for recovery from emergency stops
+- Added `recover-failed-operation` to handle failed transfers
+- Enhanced contract management functions with stricter validation
+- Added emergency withdrawal capabilities for contract owner
+
+### Analytics & Monitoring
+- Added system health monitoring functions
+- Enhanced daily analytics tracking with secure updates
+- Added comprehensive user statistics tracking
+- Implemented failed operation tracking and recovery
+
+### Constants & Error Handling
+```clarity
+;; New error constants
+ERR-DOUBLE-STAKE       u800
+ERR-CONTRACT-PAUSED    u801
+ERR-DEADLINE-PASSED    u802
+ERR-CIRCUIT-BREAKER    u806
+ERR-REENTRANCY        u807
+ERR-DATA-VALIDATION    u808
+```
+
+### Security State Variables
+```clarity
+circuit-breaker-triggered    bool
+reentrancy-guard            bool
+error-count                 uint
+max-errors-per-block        uint
+```
 
 ## 📋 Table of Contents
 
@@ -214,6 +203,12 @@ Create a new prediction category with deadline.
 
 #### `set-staking-tier(tier: uint, minimum-stake: uint, multiplier: uint)`
 Configure staking tiers with reward multipliers.
+
+#### `reset-circuit-breaker()`
+Reset the circuit breaker in case of a false positive trigger (owner only).
+
+#### `recover-failed-operation(batch-id: uint)`
+Recover from a failed batch operation (owner only).
 
 ### Read-Only Functions
 
