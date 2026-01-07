@@ -349,13 +349,14 @@
                             ;; INTERACTIONS - Calculate and transfer rewards with validation
                             (let ((reward-share (/ (* user-stake PRECISION) winning-pool))
                                   (total-reward (/ (* losing-pool reward-share) PRECISION))
-                                  (final-payout (+ user-stake total-reward)))
+                                  (final-payout (+ user-stake total-reward))
+                                  (recipient tx-sender))
                                 (begin
                                     ;; Explicit validation of calculations
                                     (asserts! (>= final-payout user-stake) (handle-error ERR-REWARD-CALCULATION-FAILED))
                                     (asserts! (<= final-payout MAX-STAKE-AMOUNT) (handle-error ERR-REWARD-CALCULATION-FAILED))
                                     
-                                    (try! (as-contract (safe-transfer-with-recovery final-payout tx-sender tx-sender)))
+                                    (try! (as-contract (safe-transfer-with-recovery final-payout tx-sender recipient)))
                                     (unwrap-panic (clear-reentrancy))
                                     (ok total-reward))))))))))
 
@@ -641,4 +642,3 @@
     })
 
 (define-read-only (get-failed-operation (operation-id uint))
-    (map-get? failed-operations { operation-id: operation-id }))
